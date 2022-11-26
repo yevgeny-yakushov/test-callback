@@ -9,8 +9,8 @@ CPromise::CPromise(const QFuture<bool>& future) :
     m_pWatcher = new QFutureWatcher<bool>;
 
     connect(m_pWatcher, &QFutureWatcher<bool>::finished, this, [=] {
+        callPromises();
         emit finished();
-        call_callback();
     });
 
     m_pWatcher->setFuture(future);
@@ -22,13 +22,14 @@ CPromise::~CPromise()
     delete m_pWatcher; m_pWatcher = nullptr;
 }
 
-/*------------ call_callback ------------------------------*/
-void CPromise::call_callback()
+/*------------ callPromises -------------------------------*/
+void CPromise::callPromises()
 {
-    if (m_callback)
+    while (m_qPromises.size())
     {
-        qDebug() << "CALL FROM CPP";
-        m_callback();
+        auto fn = m_qPromises.dequeue();
+
+        if (fn) fn();
     }
 }
 

@@ -13,8 +13,10 @@ CQueryImpl::~CQueryImpl()
 
 void CQueryImpl::startTest(int val1, int val2)
 {
-    startTask(EQUERY_TESTING, this, &CQueryImpl::largeMethod, 200, 50, 100)
-        ->callback(&CQueryImpl::callBackTest, this, val1, val2);
+        startTask(EQUERY_TESTING, this, &CQueryImpl::largeMethod, 200, 50, 100)
+            ->then(&CQueryImpl::callBackTest, this, val1, val2)
+            ->then([=]() { qDebug() << "THIS IS LAMBDA\t" << val1 + val2; })
+            ->then(&CQueryImpl::callBackTest, this, 567, 345);
 }
 
 void CQueryImpl::callBackTest(int val1, int val2)

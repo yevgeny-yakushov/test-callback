@@ -22,22 +22,23 @@ public:
 
 public:
     template <class Function, class... Args>
-    void callback(Function &&f, Args&&... args)
+    CPromise* then(Function &&f, Args&&... args)
     {
-        m_callback = std::bind(std::forward<Function>(f), std::forward<Args>(args)...);
-//        m_callback();
+        m_qPromises.enqueue(std::bind(std::forward<Function>(f), std::forward<Args>(args)...));
+        return this;
     }
 
 public:
-    void    call_callback   ();
+    void    callPromises    ();
 
 signals:
     void    finished        ();
 
 private:
-    QFutureWatcher<bool>*   m_pWatcher;
+    QFutureWatcher<bool>*           m_pWatcher;
 
-    std::function<void()>   m_callback = nullptr;
+    QQueue<std::function<void()>>   m_qPromises;
+//    std::function<void()>   m_callback;
 };
 
 //=======================================================================================
@@ -51,7 +52,6 @@ public:
 
 public:
     CPromise* addTask(EQUERY task, const QFuture<bool>& future);
-
 private:
     QMap<CPromise*, EQUERY>  m_mapTasks;
 
